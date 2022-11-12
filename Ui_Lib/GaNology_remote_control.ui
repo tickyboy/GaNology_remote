@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuDevices">
+    <property name="title">
+     <string>Devices</string>
+    </property>
+    <widget class="QMenu" name="menuSignal_Generator">
+     <property name="title">
+      <string>Signal Generator</string>
+     </property>
+     <addaction name="actionSMB100A"/>
+     <addaction name="actionSMA100B"/>
+    </widget>
+    <widget class="QMenu" name="menuVector_Network_Analyzer">
+     <property name="title">
+      <string>Vector Network Analyzer</string>
+     </property>
+     <addaction name="actionZNB40"/>
+    </widget>
+    <widget class="QMenu" name="menuSpectrum_Analyzer">
+     <property name="title">
+      <string>Spectrum Analyzer</string>
+     </property>
+     <addaction name="actionFSV7G"/>
+     <addaction name="actionFSV30G"/>
+    </widget>
+    <addaction name="menuSignal_Generator"/>
+    <addaction name="menuVector_Network_Analyzer"/>
+    <addaction name="menuSpectrum_Analyzer"/>
+   </widget>
+   <widget class="QMenu" name="menuTestBenches">
+    <property name="title">
+     <string>TestBenches</string>
+    </property>
+    <addaction name="actionS_para_Measurement"/>
+    <addaction name="actionNF_Sourcepull"/>
+   </widget>
+   <addaction name="menuDevices"/>
+   <addaction name="menuTestBenches"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionSMB100A">
+   <property name="text">
+    <string>SMB100A</string>
+   </property>
+  </action>
+  <action name="actionSMA100B">
+   <property name="text">
+    <string>SMA100B</string>
+   </property>
+  </action>
+  <action name="actionZNB40">
+   <property name="text">
+    <string>ZNB40</string>
+   </property>
+  </action>
+  <action name="actionFSV7G">
+   <property name="text">
+    <string>FSV7G</string>
+   </property>
+  </action>
+  <action name="actionFSV30G">
+   <property name="text">
+    <string>FSV30G</string>
+   </property>
+  </action>
+  <action name="actionS_para_Measurement">
+   <property name="text">
+    <string>S-para Measurement</string>
+   </property>
+  </action>
+  <action name="actionNF_Sourcepull">
+   <property name="text">
+    <string>NF Sourcepull</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

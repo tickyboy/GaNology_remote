@@ -1,0 +1,2 @@
+## GaNology Remote -- an auto test&measurement solution for GaN lab, SIST 1D-309, Shanghaitech University, Shanghai, China
+The specific readme content will be more read friendly after the functions of the application getting complete.
