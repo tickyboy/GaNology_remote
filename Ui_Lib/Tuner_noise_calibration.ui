@@ -180,21 +180,21 @@
              <item>
               <layout class="QVBoxLayout" name="verticalLayout">
                <item>
-                <widget class="QLineEdit" name="lineEdit">
+                <widget class="QLineEdit" name="VNA_IP_edit">
                  <property name="text">
                   <string>10.0.0.4</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QLineEdit" name="lineEdit_2">
+                <widget class="QLineEdit" name="Tunner_IP_edit">
                  <property name="text">
                   <string>10.0.0.1</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QLineEdit" name="lineEdit_3">
+                <widget class="QLineEdit" name="Spectrum_IP_edit">
                  <property name="text">
                   <string>10.0.0.15</string>
                  </property>
@@ -255,7 +255,7 @@
           </layout>
          </item>
          <item>
-          <widget class="QTextBrowser" name="textBrowser_2">
+          <widget class="QTextBrowser" name="textBrowser_NF_info">
            <property name="html">
             <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -356,7 +356,7 @@ p, li { white-space: pre-wrap; }
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_7">
               <item>
-               <widget class="QLineEdit" name="lineEdit_4">
+               <widget class="QLineEdit" name="Cal_number_edit">
                 <property name="font">
                  <font>
                   <pointsize>12</pointsize>
@@ -365,7 +365,7 @@ p, li { white-space: pre-wrap; }
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="lineEdit_5">
+               <widget class="QLineEdit" name="Max_POS_edit">
                 <property name="font">
                  <font>
                   <pointsize>12</pointsize>
@@ -425,7 +425,7 @@ p, li { white-space: pre-wrap; }
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="lineEdit_6">
+             <widget class="QLineEdit" name="Calpoint_edit">
               <property name="font">
                <font>
                 <pointsize>12</pointsize>
@@ -562,7 +562,7 @@ p, li { white-space: pre-wrap; }
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="lineEdit_7">
+             <widget class="QLineEdit" name="VNA_SET_edit">
               <property name="font">
                <font>
                 <pointsize>12</pointsize>
@@ -573,7 +573,7 @@ p, li { white-space: pre-wrap; }
            </layout>
           </item>
           <item row="2" column="0">
-           <widget class="QTextBrowser" name="textBrowser">
+           <widget class="QTextBrowser" name="textBrowser_VNA_info">
             <property name="html">
              <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -846,7 +846,7 @@ p, li { white-space: pre-wrap; }
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_8">
               <item>
-               <widget class="QLineEdit" name="lineEdit_8">
+               <widget class="QLineEdit" name="freq_start_edit">
                 <property name="font">
                  <font>
                   <pointsize>12</pointsize>
@@ -855,7 +855,7 @@ p, li { white-space: pre-wrap; }
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="lineEdit_9">
+               <widget class="QLineEdit" name="freq_stop_edit">
                 <property name="font">
                  <font>
                   <pointsize>12</pointsize>
@@ -864,7 +864,7 @@ p, li { white-space: pre-wrap; }
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="lineEdit_10">
+               <widget class="QLineEdit" name="freq_step_edit">
                 <property name="font">
                  <font>
                   <pointsize>12</pointsize>
@@ -873,7 +873,7 @@ p, li { white-space: pre-wrap; }
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="lineEdit_11">
+               <widget class="QLineEdit" name="freq_point_edit">
                 <property name="font">
                  <font>
                   <pointsize>12</pointsize>
@@ -882,7 +882,7 @@ p, li { white-space: pre-wrap; }
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="lineEdit_12">
+               <widget class="QLineEdit" name="preamp_edit">
                 <property name="font">
                  <font>
                   <pointsize>12</pointsize>
@@ -891,7 +891,7 @@ p, li { white-space: pre-wrap; }
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="lineEdit_13">
+               <widget class="QLineEdit" name="RBW_edit">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
@@ -903,7 +903,7 @@ p, li { white-space: pre-wrap; }
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="lineEdit_14">
+               <widget class="QLineEdit" name="VBW_edit">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
@@ -915,7 +915,7 @@ p, li { white-space: pre-wrap; }
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="lineEdit_15">
+               <widget class="QLineEdit" name="Sweeptime_edit">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
@@ -931,7 +931,7 @@ p, li { white-space: pre-wrap; }
            </layout>
           </item>
           <item row="0" column="1">
-           <widget class="QTextBrowser" name="textBrowser_4">
+           <widget class="QTextBrowser" name="textBrowser_Spectrum_info">
             <property name="html">
              <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -958,7 +958,7 @@ p, li { white-space: pre-wrap; }
            </spacer>
           </item>
           <item row="2" column="1">
-           <widget class="QPushButton" name="NF_connect_button_2">
+           <widget class="QPushButton" name="Calibration_button">
             <property name="font">
              <font>
               <family>Calibri</family>
@@ -989,12 +989,19 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
        <item row="1" column="2" colspan="2">
-        <widget class="QTextBrowser" name="textBrowser_3">
+        <widget class="QTextBrowser" name="textBrowser_LOG">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="html">
+          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Calibri'; font-size:10pt; font-weight:600; font-style:normal;&quot;&gt;
+&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
        </item>
