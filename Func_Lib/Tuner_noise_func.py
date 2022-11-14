@@ -1,23 +1,38 @@
 import telnetlib
 import pyvisa, sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.Qt import (QApplication, QWidget, QPushButton, QThread)
+from PyQt5.QtCore import QObject , pyqtSignal
+from PyQt5.Qt import QApplication, QWidget, QPushButton, QThread, QMutex, pyqtSignal
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLineEdit, QMessageBox, QGridLayout, QLabel, \
     QPushButton, QFrame
 import time
 import Ui_Lib.Tuner_noise_calibration as ui
 from PyQt5.QtGui import *
+import threading
 
+class message(QThread):
+    signal = pyqtSignal()
+
+    def __init__(self, FuncClass_Tuner):
+        super(message, self).__init__()
+        self.window = FuncClass_Tuner
+
+    def run(self):
+        self.signal.emit()
 
 class FuncClass_Tuner(QWidget):
     def __init__(self, parent=None):
         super(FuncClass_Tuner, self).__init__(parent)
+        self.QThread_errtext = ''
+        self.message = message(self)
+
         self.log_creation()
         self.ui_form = ui.Ui_Form()
         self.ui_form.setupUi(self)
 
+        self.ui_form.Stop_Button.clicked.connect(self.Stop)
         self.ui_form.NF_connect_button.clicked.connect(self.connect_button_clicked)
-        self.ui_form.Calibration_button.clicked.connect(self.Calibration_clicked)
+        self.ui_form.Calibration_button.clicked.connect(self.Tread_1)
         self.ui_form.Tuner_init_button.clicked.connect(self.Tunner_initial_function)
         self.setWindowTitle('GaNology Tuner NF Measurement')
         self.setWindowIcon(QIcon('./images/iic.ico'))
@@ -207,33 +222,26 @@ class FuncClass_Tuner(QWidget):
             pass
 
     def Calibration_clicked(self):
-        self.freq_start = self.ui_form.freq_start_edit.text()
-        self.freq_step = self.ui_form.freq_step_edit.text()
-        self.freq_stop = self.ui_form.freq_stop_edit.text()
-        self.preamp = self.ui_form.preamp_edit.text()
-        self.cali_num = self.ui_form.Cal_number_edit.text()
-        self.max_pos = self.ui_form.Max_POS_edit.text()
-        self.VNA_SET = self.ui_form.VNA_SET_edit.text()
-        self.Calpoint = self.ui_form.Calpoint_edit.text()
+        try:
 
-        box = QMessageBox()
-        box.setIcon(1)
-        box.setWindowTitle("Settings Configeration")
-        box.setText("Please Check the settings for the NF measurement:\n"+"Frequency:"+self.freq_start
+            self.control_flag = 1
+            self.freq_start = self.ui_form.freq_start_edit.text()
+            self.freq_step = self.ui_form.freq_step_edit.text()
+            self.freq_stop = self.ui_form.freq_stop_edit.text()
+            self.preamp = self.ui_form.preamp_edit.text()
+            self.cali_num = self.ui_form.Cal_number_edit.text()
+            self.max_pos = self.ui_form.Max_POS_edit.text()
+            self.VNA_SET = self.ui_form.VNA_SET_edit.text()
+            self.Calpoint = self.ui_form.Calpoint_edit.text()
+            self.confirm_message_set("Please Check the settings for the NF measurement:\n"+"Frequency:"+self.freq_start
                     +" to "+self.freq_stop+"\n"+"Frequency Step:"+self.freq_step+"\n"+"VNA SET Name:"+self.VNA_SET+'\n'
                     +'Calibration ID:'+self.cali_num+'\n'+'Preamplifier:'+self.preamp)
-        yes = box.addButton('Begin', QMessageBox.YesRole)
-        no = box.addButton('Change Settings', QMessageBox.NoRole)
-        box.setIcon(1)
-        box.exec_()
-        if box.clickedButton() == yes:
-            self.BeginCal()
-        else:
-            pass
 
+
+
+        except Exception as e:
+            self.message_set(e)
     def BeginCal(self):
-
-
         try:
             # =========================建立Noise测试channel===========================
             self.RF_FSV3000.write("INST:CRE:NEW NOISE, 'Noise'")
@@ -249,26 +257,37 @@ class FuncClass_Tuner(QWidget):
             self.step_freq = int(self.RF_FSV3000.read())
             #=========================================================================
             self.Command_func(self.tn, 'LOADCAL '+self.cali_num, self.cali_num)  # 加载特定idx的校准数据
-            self.Command_func(self.tn, 'Pos 3 '+self.max_pos, 'JOB')  # 有谐波的校准数据时，需要先将谐波探针移动到最大的x轴位置，具体位置在校准文件中获得
+            #===============检查MaX pos输入是否合法======================
+            if int(self.max_pos)<34000 and int(self.max_pos)>0:
+                self.Command_func(self.tn, 'Pos 3 '+self.max_pos, 'JOB')  # 有谐波的校准数据时，需要先将谐波探针移动到最大的x轴位置，具体位置在校准文件中获得
+            else:
+                self.LOG_record('[' + str(time.ctime(time.time())) + '] ' + '2nd Pos illegal. It should be in the range of 0 to 3400')
+                return None
+
             Mov_query_res = Read_Result_Order
             self.wait_function(Mov_query_res)#等待tunner移动完毕
 
             self.Command_func(self.tn, 'DIR', '0169')
             calibration_points = Read_Result_Order[3]  # 获取校准点数量
             for cali_index in range(int(calibration_points)):
-                print(1)
+                if self.control_flag == 1:
+                    pass
+                else:
+                    self.LOG_record('[' + str(time.ctime(time.time())) + '] Calibration Aborted')
+                    break
+
                 self.LOG_record('[' + str(time.ctime(time.time())) + '] ' + '这是第' + str(cali_index + 1) + '个校准点，共'
                                 +str(calibration_points)+'个校准点')
-                print(1)
+
                 # ========================================建立loss文件文件头==============================================
                 logfile = open('E:/ITuner_data/LOSS_DATA/Tunerloss_calpoint' + str(cali_index + 1) + '.loss',
                                'w')  # 建立loss文件
                 logfile.write('<?xml version="1.0" encoding="UTF-8"?>\n<TableAttributes>\n <Header comment=""/>\n')
                 # =====================================================================================================
-                print(1)
+
                 # ========================================tunner移动到校准文件相应位置=====================================
                 self.Command_func(self.tn, 'CALPOINT? ' + str(cali_index + 1), 'xpos=')  # 询问这个校准点的x，y轴数据用于检查和对比
-                print(1)
+
                 normalize_list = Read_Result_Order[1].split('=')  # 中转数组，用于寻找y轴数值
                 Read_Result_Order[1] = normalize_list[1]  # 标准化数组输入
                 calipoint_index_list = Read_Result_Order  # 将标准化数组输入转存特定数组
@@ -299,7 +318,7 @@ class FuncClass_Tuner(QWidget):
                 self.LOG_record('[' + str(time.ctime(time.time())) + '] ' + '校准文件位置x=' + calipoint_index_list[0] + ', y=' +
                       calipoint_index_list[1])
                 time.sleep(1)
-                print(1)
+
                 # ===================================tuner移动完成，开始S参数扫描建立插损文件=========================
                 self.RF_ZNB40.write(
                     "MMEM:LOAD:STAT 1, 'C:/Users/Public/Documents/Rohde-Schwarz/VNA/RecallSets/"+self.VNA_SET+"'")  # 矢网校准设置加载
@@ -308,14 +327,12 @@ class FuncClass_Tuner(QWidget):
                 self.RF_ZNB40.write("INIT:IMM; *WAI")
                 self.wait_visa_command(self.RF_ZNB40, 'S-para Sweep complete')
                 insertion_loss_string = ''
-                print(1)
+
                 for freq_point in range(self.sweep_points):
-                    print(1)
                     freq = str(self.start_freq + freq_point * self.step_freq)  # 当前频率点
                     self.RF_ZNB40.write("CALC1:PAR:SEL 'Trc3'")  # 选择Trc3为活跃曲线（选中Trc3）
                     self.RF_ZNB40.write("CALC1:MARK1 ON; MARK1:X " + freq + "Hz")
                     time.sleep(0.2)
-                    print(1)
                     self.RF_ZNB40.write("CALC1:MARK1:X?")
                     read_marker_x = self.RF_ZNB40.read().replace("\n", "")
                     self.RF_ZNB40.write("CALC1:MARK1:Y?")
@@ -346,19 +363,69 @@ class FuncClass_Tuner(QWidget):
                 self.RF_FSV3000.write(
                     "SENS:CORR:SAVE 'C:/R_S/Instr/user/Noise/Cal/Tuner_Calipoint_" + str(cali_index + 1) + ".dfl'")
                 self.wait_visa_command(self.RF_FSV3000, 'Saving calibration data completed\n')
-
-
+            if self.control_flag == 1:
+                self.LOG_record('[' + str(time.ctime(time.time())) + '] Calibration Completed')
+            else:
+                pass
 
 
         except Exception as e:
-            box = QMessageBox()
-            box.setIcon(3)
-            box.setWindowTitle("Message")
-            box.setText(str(e))
-            yes = box.addButton('OK', QMessageBox.YesRole)
-            no = box.addButton('Cancel', QMessageBox.NoRole)
-            box.setIcon(3)
-            box.exec_()
+            self.message_set(e)
             self.LOG_record('[' + str(time.ctime(time.time())) + '] '+"Connect to Tunner("
                             + str(e) + "\n")
 
+    def Tread_1(self):
+        try:
+            th_1 = threading.Thread(target=self.Calibration_clicked, name='calibration')
+            th_1.start()
+        except Exception as e:
+            self.message_set(e)
+
+            self.LOG_record('[' + str(time.ctime(time.time())) + '] '+str(e) + "\n")
+    def Stop(self):
+        self.control_flag = 0
+
+    def messagebox(self):
+        try:
+            self.box = QMessageBox()
+            self.box.setIcon(3)
+            self.box.setWindowTitle("Message")
+            self.box.setText(str(self.QThread_errtext))
+            self.yes = self.box.addButton('OK', QMessageBox.YesRole)
+            self.abort = self.box.addButton('cc', QMessageBox.YesRole)
+            self.no = self.box.addButton('Cancel', QMessageBox.NoRole)
+
+            self.box.setIcon(3)
+            self.box.exec_()
+            #QMessageBox.information(self, 'Warning', self.QThread_errtext,QMessageBox.Ok)
+
+        except Exception as e:
+            #print('YES01')
+            print(e)
+    def message_set(self, text):
+        self.QThread_errtext = text
+        self.message.signal.connect(self.messagebox)
+        self.message.start()
+
+    def confirm_messagebox(self):
+        try:
+            box = QMessageBox()
+            box.setIcon(1)
+            box.setWindowTitle("Message")
+            box.setText(str(self.QThread_errtext))
+            yes = box.addButton('OK', QMessageBox.YesRole)
+            no = box.addButton('Cancel', QMessageBox.NoRole)
+
+            box.setIcon(1)
+            box.exec_()
+            if box.clickedButton() == yes:
+                self.BeginCal()
+            else:
+                pass
+        except Exception as e:
+            #print('YES01')
+            print(e)
+    def confirm_message_set(self, text):
+        self.QThread_errtext = text
+        self.message.signal.connect(self.confirm_messagebox)
+        self.message.start()
