@@ -455,8 +455,6 @@ class FuncClass_Tuner(QWidget):
         self.QThread_errtext = text
         self.message.signal.connect(self.confirm_messagebox)
         self.message.start()
-
-
     def confirm_messagebox_forNF(self):
         try:
             box = QMessageBox()
@@ -486,17 +484,38 @@ class FuncClass_Tuner(QWidget):
             self.LOG_record('[' + str(time.ctime(time.time())) + '] '+str(e) + "\n")
     def NF_Measure_clicked(self):
         try:
+            self.rm_DC = pyvisa.ResourceManager()
+            self.RF_DC = self.rm_DC.open_resource('USB0::0x2A8D::0x1002::MY58420959::INSTR')
+            self.RF_DC.write('*RST')
+            self.RF_DC.write('*IDN?')
+            self.connect_success_text = self.RF_DC.read()
+            self.LOG_record_NF_measure('[' + str(time.ctime(time.time())) + '] '
+                                       + "Connect Successfully to " + self.connect_success_text)
+            self.gate_voltage = self.ui_form.Vg_edit.text()
+            self.drain_voltage = self.ui_form.Vd_edit.text()
+            self.RF_DC.write(":APPLY P25V, 5, 0.1")
+            self.RF_DC.write(":OUTPUT:STATE 1")
+            self.LOG_record_NF_measure('[' + str(time.ctime(time.time())) + '] '
+                                       + 'Vg set, waiting for Vd')
+            time.sleep(2)
+            self.RF_DC.write(":APPLY P6V, 5, 0.1")
+            self.RF_DC.write(":OUTPUT:STATE 1")
+            self.LOG_record_NF_measure('[' + str(time.ctime(time.time())) + '] '
+                                       + 'Vd set')
+
+        except Exception as e:
+            self.message_set(e)
+            ''''
             self.control_flag = 1
-            self.freq_start = self.ui_form.freq_start_edit.text()
-            self.freq_step = self.ui_form.freq_step_edit.text()
-            self.freq_stop = self.ui_form.freq_stop_edit.text()
-            self.preamp = self.ui_form.preamp_edit.text()
-            self.cali_num = self.ui_form.Cal_number_edit.text()
-            self.max_pos = self.ui_form.Max_POS_edit.text()
-            self.VNA_SET = self.ui_form.VNA_SET_edit.text()
-            self.Calpoint = self.ui_form.Calpoint_edit.text()
+            self.freq_start = self.ui_form.freq_start_edit_NF.text()
+            self.freq_step = self.ui_form.freq_step_edit_NF.text()
+            self.freq_stop = self.ui_form.freq_stop_edit_NF.text()
+            self.preamp = self.ui_form.preamp_edit_NF.text()
+            self.cali_num = self.ui_form.Cal_number_edit_NF.text()
+            self.max_pos = self.ui_form.Max_POS_edit_NF.text()
+            self.Calpoint = self.ui_form.Calpoint_edit_NF.text()
             self.confirm_message_set_forNF("Please Check the settings for the NF measurement:\n"+"Frequency:"+self.freq_start
-                    +" to "+self.freq_stop+"\n"+"Frequency Step:"+self.freq_step+"\n"+"VNA SET Name:"+self.VNA_SET+'\n'
+                    +" to "+self.freq_stop+"\n"+"Frequency Step:"+self.freq_step+"\n"+'\n'
                     +'Calibration ID:'+self.cali_num+'\n'+'Preamplifier:'+self.preamp)
         except Exception as e:
             self.message_set(e)
@@ -659,3 +678,4 @@ class FuncClass_Tuner(QWidget):
             self.message_set(e)
             self.LOG_record_NF_measure('[' + str(time.ctime(time.time())) + '] '+"Connect to Tunner("
                             + str(e) + "\n")
+'''
