@@ -484,6 +484,7 @@ class FuncClass_Tuner(QWidget):
             self.LOG_record('[' + str(time.ctime(time.time())) + '] '+str(e) + "\n")
     def NF_Measure_clicked(self):
         try:
+            #连接DC源
             self.rm_DC = pyvisa.ResourceManager()
             self.RF_DC = self.rm_DC.open_resource('USB0::0x2A8D::0x1002::MY58420959::INSTR')
             self.RF_DC.write('*RST')
@@ -491,22 +492,12 @@ class FuncClass_Tuner(QWidget):
             self.connect_success_text = self.RF_DC.read()
             self.LOG_record_NF_measure('[' + str(time.ctime(time.time())) + '] '
                                        + "Connect Successfully to " + self.connect_success_text)
-            self.gate_voltage = self.ui_form.Vg_edit.text()
-            self.drain_voltage = self.ui_form.Vd_edit.text()
-            self.RF_DC.write(":APPLY P25V, 5, 0.1")
-            self.RF_DC.write(":OUTPUT:STATE 1")
-            self.LOG_record_NF_measure('[' + str(time.ctime(time.time())) + '] '
-                                       + 'Vg set, waiting for Vd')
-            time.sleep(2)
-            self.RF_DC.write(":APPLY P6V, 5, 0.1")
-            self.RF_DC.write(":OUTPUT:STATE 1")
-            self.LOG_record_NF_measure('[' + str(time.ctime(time.time())) + '] '
-                                       + 'Vd set')
 
-        except Exception as e:
-            self.message_set(e)
-            ''''
             self.control_flag = 1
+            self.neg_gate_voltage = self.ui_form.Vg_edit.text()
+            self.pos_gate_voltage = self.ui_form.Vg_positive_edit.text()
+            self.drain_voltage = self.ui_form.Vd_edit.text()
+
             self.freq_start = self.ui_form.freq_start_edit_NF.text()
             self.freq_step = self.ui_form.freq_step_edit_NF.text()
             self.freq_stop = self.ui_form.freq_stop_edit_NF.text()
@@ -593,7 +584,7 @@ class FuncClass_Tuner(QWidget):
                     break
                 self.Command_func(self.tn, 'CALPOINT ' + str(cali_index + 1), 'JOB')  # 移动探针到指定的校准点
                 Status_Check = Read_Result_Order  # 检查移动是否完毕
-                self.wait_function_NF(Status_Check)
+                self.wait_function_NF(Status_Check)#移动完毕
 
                 self.Command_func(self.tn, 'Pos?', ' ')  # 询问当前位置
                 current_xposition = Read_Result_Order[0].split('=')[1]
@@ -604,6 +595,27 @@ class FuncClass_Tuner(QWidget):
                 self.LOG_record_NF_measure('[' + str(time.ctime(time.time())) + '] ' + '校准文件位置x=' + calipoint_index_list[0] + ', y=' +
                                 calipoint_index_list[1])
                 time.sleep(1)
+                self.LOG_record_NF_measure('[' + str(time.ctime(time.time())) + '] '
+                                           +'Applying DC bias')
+                #==========channel 1 ====================================
+                self.RF_DC.write(":APPLY P6V, " + self.pos_gate_voltage + ", 0.1")
+                self.RF_DC.write(":OUTPUT:STATE 1")
+                self.LOG_record_NF_measure('[' + str(time.ctime(time.time())) + '] '
+                                           + 'Vg pos set')
+                time.sleep(1)
+
+                self.RF_DC.write(":APPLY N25V, " + self.neg_gate_voltage + ", 0.1")
+                self.RF_DC.write(":OUTPUT:STATE 1")
+                self.LOG_record_NF_measure('[' + str(time.ctime(time.time())) + '] '
+                                           + 'Vg neg set')
+                time.sleep(1)
+
+                self.RF_DC.write(":APPLY P25V, " + self.drain_voltage + ", 0.1")
+                self.RF_DC.write(":OUTPUT:STATE 1")
+                self.LOG_record_NF_measure('[' + str(time.ctime(time.time())) + '] '
+                                           + 'Vd set')
+                time.sleep(3)
+
 
                 # ========================================建立measure文件文件头==============================================
                 with open('E:/ITuner_data/Measurement_Results/' + self.log_name
@@ -620,9 +632,34 @@ class FuncClass_Tuner(QWidget):
                                       +"_Calipoint_" + str(cali_index + 1) + ".dfl'")
                 self.wait_visa_command_NF(self.RF_FSV3000, "Tuner_Cal#"+self.cali_num_NF
                                       +"_Calipoint_" + str(cali_index + 1) + ".dfl loaded")
+                self.LOG_record_NF_measure('[' + str(time.ctime(time.time())) + '] '
+                                           + 'Measuring')
                 self.RF_FSV3000.write("SENS:CONF:LIST:SINGL")
                 self.RF_FSV3000.write("INIT:IMM; *WAI")
-                self.wait_visa_command_NF(self.RF_FSV3000, 'NF Measurement completed')
+                self.wait_visa_command_NF(self.RF_FSV3000, '[' + str(time.ctime(time.time())) + '] '
+                                           +'NF Measurement completed')
+                time.sleep(1)
+            #关闭dc供电======================================================================
+                self.RF_DC.write(":APPLY P25V, " + self.drain_voltage + ", 0.1")
+                self.RF_DC.write(":OUTPUT:STATE 0")
+                self.LOG_record_NF_measure('[' + str(time.ctime(time.time())) + '] '
+                                           + 'Vd closed')
+                time.sleep(1)
+
+                self.RF_DC.write(":APPLY P6V, " + self.pos_gate_voltage + ", 0.1")
+                self.RF_DC.write(":OUTPUT:STATE 0")
+                self.LOG_record_NF_measure('[' + str(time.ctime(time.time())) + '] '
+                                           + 'Vg pos closed')
+                time.sleep(1)
+
+                self.RF_DC.write(":APPLY N25V, " + self.neg_gate_voltage + ", 0.1")
+                self.RF_DC.write(":OUTPUT:STATE 0")
+                self.LOG_record_NF_measure('[' + str(time.ctime(time.time())) + '] '
+                                           + 'Vg neg closed')
+                time.sleep(1)
+
+
+
 
                 #========================大Marker拿数据======================================
                 for freq_point in range(self.sweep_points):
@@ -678,4 +715,23 @@ class FuncClass_Tuner(QWidget):
             self.message_set(e)
             self.LOG_record_NF_measure('[' + str(time.ctime(time.time())) + '] '+"Connect to Tunner("
                             + str(e) + "\n")
-'''
+
+
+            '''
+            
+            self.RF_DC.write(":APPLY P25V, "+self.drain_voltage+", 0.1")
+            self.RF_DC.write(":OUTPUT:STATE 1")
+            self.LOG_record_NF_measure('[' + str(time.ctime(time.time())) + '] '
+                                       + 'Vd set, waiting for Vd')
+            time.sleep(2)
+            self.RF_DC.write(":APPLY P6V, "+self.pos_gate_voltage+", 0.1")
+            self.RF_DC.write(":OUTPUT:STATE 1")
+            self.LOG_record_NF_measure('[' + str(time.ctime(time.time())) + '] '
+                                       + 'Vg pos set')
+
+            time.sleep(2)
+            self.RF_DC.write(":APPLY N25V, "+self.neg_gate_voltage+", 0.1")
+            self.RF_DC.write(":OUTPUT:STATE 1")
+            self.LOG_record_NF_measure('[' + str(time.ctime(time.time())) + '] '
+                                       + ' neg Vg set')
+            '''
