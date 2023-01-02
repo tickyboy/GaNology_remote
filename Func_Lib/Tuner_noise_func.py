@@ -367,7 +367,7 @@ class FuncClass_Tuner(QWidget):
                     self.RF_ZNB40.write("CALC1:MARK1:X?")
                     read_marker_x = self.RF_ZNB40.read().replace("\n", "")
                     self.RF_ZNB40.write("CALC1:MARK1:Y?")
-                    read_marker_y = str(abs(float(self.RF_ZNB40.read().replace("\n", ""))))
+                    read_marker_y = str(abs(float(self.RF_ZNB40.read().replace("\n", "")))+0.945)#这里添加探针连接插损
                     logfile.write(' <Data value="' + read_marker_y + '" freq="' + read_marker_x + '"/>\n')
 
                     insertion_loss_string = insertion_loss_string + read_marker_x + 'Hz,' + str(read_marker_y)
@@ -378,6 +378,9 @@ class FuncClass_Tuner(QWidget):
 
                 self.RF_FSV3000.write("CORR:LOSS:INP:MODE TABL")
                 self.RF_FSV3000.write("CORR:LOSS:INP:TABL " + insertion_loss_string)
+
+                self.RF_FSV3000.write("CORR:LOSS:OUTP:MODE SPOT")
+                self.RF_FSV3000.write("CORR:LOSS:OUTP:SPOT 0.945")
                 logfile.write('</TableAttributes>')
 
                 # =======================预放设置=============
@@ -701,11 +704,11 @@ class FuncClass_Tuner(QWidget):
                     with open('E:/ITuner_data/Measurement_Results/' + self.log_name
                           + 'NF_results_of_Cali-point#' + str(cali_index + 1) + '.csv', "a", newline='') as csvfile:
                         writer = csv.writer(csvfile)
-                        writer.writerows([[int(freq),float(self.marker_CPCold), float(self.marker_CPHot),
-                                           float(self.marker_CYFactor), float(self.marker_Gain)
-                                              , float(self.marker_Noise), float(self.marker_NunCertainty),
-                                           float(self.marker_PCold),float(self.marker_Phot),
-                                           float(self.marker_Temp), float(self.marker_YFactor)]])
+                        writer.writerows([[int(freq),self.marker_CPCold, self.marker_CPHot,
+                                           self.marker_CYFactor, self.marker_Gain
+                                              , self.marker_Noise, self.marker_NunCertainty,
+                                           self.marker_PCold,self.marker_Phot,
+                                           self.marker_Temp, self.marker_YFactor]])
                 self.LOG_record_NF_measure('NF Measurement results saved')
             self.LOG_record_NF_measure('Measurement Complete')
             time.sleep(2)
